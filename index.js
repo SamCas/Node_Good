@@ -33,12 +33,29 @@ let students = [{
 ];
 
 
-
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*"); 
+    res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE");
+    if (req.method === "OPTIONS") {
+        return res.send(204);
+    }
+    next(); //aqui se puede evitar el next(),  
+    //se usa cuando en lugar de app.use haces una funcion como middleware
+});
 
 // Req: The information that comes form the GET.
 // Res: The var we use to send the response.
 app.get('/api/students', (req, res) => {
-    res.status(200).json(students);
+    StudentList.getAll()
+        .then(studentList => {
+            return res.status(200).json(studentList);
+        })
+        .catch(error => {
+            console.log(error);
+            res.statusMessage = "Error de conexión con la BD";
+            return res.status(500).send();
+        });
 });
 
 app.get('/api/studentsByName/:name', (req, res) => {
